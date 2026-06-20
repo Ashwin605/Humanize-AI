@@ -8,13 +8,28 @@ let dbUrl = process.env.DATABASE_URL;
 // We must copy the SQLite database to /tmp so Prisma can write to it.
 if (process.env.VERCEL) {
   const tmpDbPath = '/tmp/dev.db';
-  const bundleDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+  const possiblePaths = [
+    path.join(process.cwd(), 'prisma', 'dev.db'),
+    path.join(process.cwd(), 'backend', 'prisma', 'dev.db')
+  ];
+  
+  let bundleDbPath = '';
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      bundleDbPath = p;
+      break;
+    }
+  }
   
   try {
-    if (!fs.existsSync(tmpDbPath) && fs.existsSync(bundleDbPath)) {
+    if (!fs.existsSync(tmpDbPath) && bundleDbPath) {
       fs.copyFileSync(bundleDbPath, tmpDbPath);
     }
-    dbUrl = 'file:/tmp/dev.db';
+    if (fs.existsSync(tmpDbPath)) {
+      dbUrl = 'file:/tmp/dev.db';
+    } else {
+      console.error('ERROR: Could not find bundled dev.db in any of these locations:', possiblePaths);
+    }
   } catch (e) {
     console.error('Failed to copy database to /tmp', e);
   }
