@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 210 40% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 40% 8%;
+    --primary: 210 55% 15%;
+    --primary-foreground: 45 50% 96%;
+    --secondary: 210 15% 93%;
+    --secondary-foreground: 210 40% 15%;
+    --muted: 210 15% 95%;
+    --muted-foreground: 210 10% 45%;
+    --accent: 38 55% 52%;
+    --accent-foreground: 210 55% 10%;
+    --border: 210 15% 88%;
+    --input: 210 15% 88%;
+    --ring: 38 55% 52%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 210 40% 6%;
+    --foreground: 210 15% 95%;
+    --card: 210 35% 10%;
+    --card-foreground: 210 15% 95%;
+    --primary: 38 55% 52%;
+    --primary-foreground: 210 55% 8%;
+    --secondary: 210 30% 14%;
+    --secondary-foreground: 210 15% 90%;
+    --muted: 210 30% 14%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 38 55% 52%;
+    --accent-foreground: 210 55% 8%;
+    --border: 210 25% 18%;
+    --input: 210 25% 18%;
+    --ring: 38 55% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/70 dark:bg-navy-900/70 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-glass;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl p-6 transition-all duration-300 hover:shadow-glass-lg;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-navy-800 via-navy-600 to-gold-500 dark:from-gold-400 dark:via-gold-500 dark:to-gold-600 bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-navy-800 dark:bg-gold-500 text-white dark:text-navy-950 px-6 py-3 font-medium transition-all duration-300 hover:bg-navy-700 dark:hover:bg-gold-400 hover:shadow-gold active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-navy-200 dark:border-navy-700 bg-white/50 dark:bg-navy-900/50 backdrop-blur px-6 py-3 font-medium transition-all duration-300 hover:bg-white dark:hover:bg-navy-800 active:scale-[0.98];
+  }
+
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8 py-16 md:py-24;
+  }
+
+  .container-max {
+    @apply max-w-7xl mx-auto;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-navy-300 dark:bg-navy-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-navy-400 dark:bg-navy-500;
+}
+
+::selection {
+  @apply bg-gold-200 dark:bg-gold-700 text-navy-900;
+}

@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String?
+  name              String
+  avatarUrl         String?
+  role              String    @default("USER")
+  emailVerified     Boolean   @default(false)
+  googleId          String?   @unique
+  verificationToken String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLoginAt       DateTime?
+
+  subscription      Subscription?
+  documents         Document[]
+  templates         Template[]
+  citationLibraries CitationLibrary[]
+  usageLogs         UsageLog[]
+  auditLogs         AuditLog[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Subscription {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  plan                 String   @default("FREE")
+  status               String   @default("ACTIVE")
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  documentsLimit       Int      @default(10)
+  wordsLimit           Int      @default(50000)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Document {
+  id              String   @id @default(uuid())
+  userId          String
+  title           String
+  originalText    String
+  enhancedText    String?
+  enhancementMode String   @default("PROFESSIONAL_LEGAL")
+  citationFormat  String   @default("OSCOLA")
+  status          String   @default("DRAFT")
+  wordCount       Int      @default(0)
+  s3Key           String?
+  metadata        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions DocumentVersion[]
+  analysis DocumentAnalysis?
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("documents")
+}
+
+model DocumentVersion {
+  id           String   @id @default(uuid())
+  documentId   String
+  version      Int
+  originalText String
+  enhancedText String?
+  changeNote   String?
+  createdAt    DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@map("document_versions")
+}
+
+model DocumentAnalysis {
+  id                       String   @id @default(uuid())
+  documentId               String   @unique
+  readabilityScore         Float
+  grammarScore             Float
+  coherenceScore           Float
+  legalTerminologyDensity  Float
+  sentenceVarietyScore     Float
+  citationConsistencyScore Float
+  insights                 String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@map("document_analyses")
+}
+
+model Template {
+  id              String   @id @default(uuid())
+  userId          String?
+  name            String
+  description     String?
+  content         String
+  enhancementMode String   @default("PROFESSIONAL_LEGAL")
+  isPublic        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("templates")
+}
+
+model CitationLibrary {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  citation  String
+  format    String   @default("OSCOLA")
+  notes     String?
+  tags      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("citation_libraries")
+}
+
+model UsageLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String
+  tokensUsed Int      @default(0)
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("usage_logs")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  resource  String
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model PromptTemplate {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  description     String?
+  systemPrompt    String
+  userPrompt      String
+  enhancementMode String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("prompt_templates")
+}
+
+model Analytics {
+  id               String   @id @default(uuid())
+  date             DateTime @unique
+  totalUsers       Int      @default(0)
+  activeUsers      Int      @default(0)
+  documentsCreated Int      @default(0)
+  wordsProcessed   Int      @default(0)
+  tokensUsed       Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@map("analytics")
+}
